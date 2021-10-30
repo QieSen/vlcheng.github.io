@@ -6,7 +6,7 @@
 
 <title>DietPi使用apt search搜索缓慢 | QieSen碎碎念</title>
 
-<link rel="shortcut icon" href="https://vlcheng.github.io/favicon.ico?v=1635625558360">
+<link rel="shortcut icon" href="https://vlcheng.github.io/favicon.ico?v=1635626384947">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://vlcheng.github.io/styles/main.css">
@@ -77,7 +77,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1635625558360" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1635626384947" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -168,11 +168,12 @@ Acquire::IndexTargets::deb-src::Sources::KeepCompressedAs &quot;xz&quot;;
 </tr>
 </tbody>
 </table>
-<p>压缩比xz最好，lz4最差，但是体积并不是唯一的考量因素，为了稍微严谨一点，需要对三种压缩方式进行测试。为此找来一个目录，通过tar打包后体积为146MB，移动到/tmp避免外置存储带宽瓶颈，分别使用gzip、xz、lz4进行单线程压缩，压缩比调节全部使用默认设置。</p>
+<p>压缩比xz最好，lz4最差，但是体积并不是唯一的考量因素，为了稍微严谨一点，需要对三种压缩方式进行测试。为此找来一个目录，通过tar打包后体积为146MB，移动到/tmp避免外置存储带宽瓶颈，分别使用gzip、xz、lz4进行单线程压缩，使用默认设置。</p>
 <table>
 <thead>
 <tr>
 <th>软件</th>
+<th>默认压缩等级</th>
 <th>压缩</th>
 <th>体积</th>
 <th>压缩比</th>
@@ -183,35 +184,47 @@ Acquire::IndexTargets::deb-src::Sources::KeepCompressedAs &quot;xz&quot;;
 <tr>
 <td>tar/stable 1.34+dfsg-1 arm64</td>
 <td>\</td>
+<td>\</td>
 <td>146M</td>
 <td>\</td>
 <td>\</td>
 </tr>
 <tr>
 <td>gzip/stable 1.10-4 arm64</td>
+<td>6 (1-9)</td>
 <td>22s</td>
 <td>40M</td>
 <td>27.39%</td>
 <td>4s</td>
 </tr>
 <tr>
+<td>lz4/stable 1.9.3-2 arm64</td>
+<td>1 (1-9)</td>
+<td>3s</td>
+<td>66M</td>
+<td>45.20%</td>
+<td>2s</td>
+</tr>
+<tr>
 <td>xz-utils/stable 5.2.5-2 arm64</td>
+<td>6 (0-9)</td>
 <td>411s</td>
 <td>32M</td>
 <td>21.91%</td>
 <td>9s</td>
 </tr>
 <tr>
-<td>lz4/stable 1.9.3-2 arm64</td>
-<td>3s</td>
-<td>66M</td>
-<td>45.20%</td>
-<td>2s</td>
+<td>xz -0</td>
+<td>0 手动指定</td>
+<td>52s</td>
+<td>40M</td>
+<td>27.39%</td>
+<td>9s</td>
 </tr>
 </tbody>
 </table>
 <p><small><em>CPU: RK3328 quad-core@1.2GHz；RAM: 2GB 32bit DDR4@1066MHz；RootFS: 32GB SDCard.</em></small></p>
-<p>测试结果确实反映了xz压缩的性能问题，尽管lzma算法压缩比一如既往的惊人，但高昂的时间成本丧尽了所有优势，并且在Google中未能找到有关lzma算法和ARM平台兼容性的反馈。</p>
+<p>xz压缩默认压缩比设置为-6 (0-9)，额外测试了-0下的性能。测试结果确实反映了xz压缩的性能问题，尽管lzma算法压缩比一如既往的惊人，但高昂的时间成本丧尽了所有优势，并且在Google中未能找到有关lzma算法和ARM平台兼容性的反馈。</p>
 <p>综合时间成本和响应速度考虑，apt软件包列表的空间占用不算太高，显然使用lz4压缩更加适合。</p>
 <blockquote>
 <p>参考来源</p>
