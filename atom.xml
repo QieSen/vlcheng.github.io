@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://vlcheng.github.io</id>
     <title>QieSen碎碎念</title>
-    <updated>2021-10-30T20:39:46.601Z</updated>
+    <updated>2021-10-30T20:40:44.325Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://vlcheng.github.io"/>
     <link rel="self" href="https://vlcheng.github.io/atom.xml"/>
@@ -133,7 +133,7 @@ Acquire::IndexTargets::deb-src::Sources::KeepCompressedAs &quot;xz&quot;;
 </tbody>
 </table>
 <p><small><em>CPU: RK3328 quad-core@1.2GHz；RAM: 2GB 32bit DDR4@1066MHz；RootFS: 32GB SDCard.</em></small></p>
-<p>xz压缩默认压缩比设置为-6 (0-9)，额外测试了-0下的性能。测试结果确实反映了xz压缩的性能问题，尽管lzma算法压缩比一如既往的惊人，但高昂的时间成本丧尽了所有优势，并且在Google中未能找到有关lzma算法和ARM平台兼容性的反馈。</p>
+<p>测试结果确实反映了xz压缩的性能问题，尽管lzma算法压缩比一如既往的惊人，但高昂的时间成本丧尽了所有优势，并且在Google中未能找到有关lzma算法和ARM平台兼容性的反馈。</p>
 <p>综合时间成本和响应速度考虑，apt软件包列表的空间占用不算太高，显然使用lz4压缩更加适合。</p>
 <blockquote>
 <p>参考来源</p>
