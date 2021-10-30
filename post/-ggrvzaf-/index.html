@@ -1,0 +1,299 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>DietPi使用apt search搜索缓慢 | QieSen碎碎念</title>
+
+<link rel="shortcut icon" href="https://vlcheng.github.io/favicon.ico?v=1635576070060">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://vlcheng.github.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            QieSen碎碎念
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1635576070060" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    DietPi使用apt search搜索缓慢
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2021-10-29 ·
+                    </time>
+                    
+                        <a href="https://vlcheng.github.io/tag/arm/" class="post-tags">
+                            # arm
+                        </a>
+                    
+                        <a href="https://vlcheng.github.io/tag/linux/" class="post-tags">
+                            # Linux
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="背景">背景</h2>
+<p>最近给NanoPi Neo3安装了基于Debian优化的发行版DietPi v7.7.3，使用apt search时遇到了性能问题。</p>
+<h2 id="问题复现">问题复现</h2>
+<p><code>sudo apt update</code>正常刷新缓存，使用<code>apt search some-package</code>时进度卡在 <strong>Full Text Search</strong>过程，迅速达到50%然后变得异常慢，从top中可以看到apt正榨干cpu核心的所有时间，整个搜索过程将持续超过十分钟，尝试换用<code>apt-cache search some-package</code>但并不能规避，同样的问题在<a href="https://forum.armbian.com/topic/14064-my-apt-search-has-become-super-slow-recently/">Armbian论坛<sup>[1]</sup></a>上也讨论。</p>
+<pre><code>$ apt --version
+apt 2.2.4 (arm64)
+
+$ sudo apt update
+Hit:1 ……
+Get:2 ……
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+
+$ apt search nano
+Sorting... Done
+Full Text Search... 50%
+^C
+
+$ apt-cache search nano
+Sorting... Done
+Full Text Search... 52%
+</code></pre>
+<p>更换镜像源，使用<code>sudo apt clean</code>和<code>sudo apt update</code>再次刷新缓存，但问题依然存在。</p>
+<h2 id="原因和解决方法">原因和解决方法</h2>
+<p>在查找类似问题的过程中看到一篇<a href="https://rongrongbq.moe/2021/07/How-to-solve-slowly-apt-search-on-Armbian/">中文博客<sup>[2]</sup></a>介绍了解决方法：</p>
+<pre><code>$ sudo echo 'Acquire::GzipIndexes &quot;false&quot;;' | sudo tee /etc/apt/apt.conf.d/99disable-compression
+$ sudo rm /var/lib/apt/lists/*.gz  # 如果你的压缩方式是 lz4，请对应更改
+$ sudo apt update
+</code></pre>
+<p>通过高优先级配置禁用了apt对软件包列表进行压缩，粗暴但简单。如果只为解决搜索慢的问题，至此已经完成了。如果对于apt软件包列表的空间占用有顾虑，则可以使用lz4压缩方式。</p>
+<h2 id="空间与效率的权衡">空间与效率的权衡</h2>
+<p>查看DietPi的项目代码发现在<code>/etc/apt/apt.conf.d/97dietpi</code>中有默认启用xz压缩的配置，同时<a href="https://github.com/MichaIng/DietPi/blob/master/rootfs/etc/apt/apt.conf.d/97dietpi#L17">维护者指出<sup>[3]</sup></a>lzma算法会显著降低软件包列表的读取速度，而Armbian则使用gzip。实际上在<a href="https://manpages.debian.org/buster/apt/apt-transport-mirror.1.en.html">apt手册<sup>[4]</sup></a>中有提到从1.6版本就已经开始支持压缩，Debian从buster开始默认启用这项特性。</p>
+<p><strong>比较多种压缩格式的效果</strong><br>
+在<code>/etc/apt/apt.conf.d/</code>目录中创建<code>99-index-compress</code>文件，写入四行内容覆盖97dietpi的配置：</p>
+<pre><code>Acquire::GzipIndexes &quot;true&quot;;
+Acquire::IndexTargets::deb::Packages::KeepCompressedAs &quot;xz&quot;;   # gz、xz、lz4
+Acquire::IndexTargets::deb::Translations::KeepCompressedAs &quot;xz&quot;;
+Acquire::IndexTargets::deb-src::Sources::KeepCompressedAs &quot;xz&quot;;
+</code></pre>
+<p>然后删除apt下载的所有文件，重新运行<code>sudo apt update</code>，再使用<code>du -hd 0 /var/lib/apt/lists</code>对目录大小进行统计：</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>gz</th>
+<th>xz</th>
+<th>lz4</th>
+<th>uncompress</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>体积</td>
+<td>12M</td>
+<td>8.6M</td>
+<td>18M</td>
+<td>47M</td>
+</tr>
+</tbody>
+</table>
+<p>压缩比xz最好，lz4最差，但是体积并不是唯一的考量因素，为了稍微严谨一点，需要对三种压缩方式进行测试。为此找来一个镜像，解压后得到一个453MB的目录，使用tar花费7s打包后体积减小到422M,分别使用gzip、xz、lz4对tar进行压缩，全部使用默认压缩设置。</p>
+<table>
+<thead>
+<tr>
+<th>软件</th>
+<th>压缩</th>
+<th>体积</th>
+<th>压缩比</th>
+<th>解压</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tar/stable 1.34+dfsg-1 arm64</td>
+<td>\</td>
+<td>422M</td>
+<td>\</td>
+<td>\</td>
+</tr>
+<tr>
+<td>gzip/stable 1.10-4 arm64</td>
+<td>101s</td>
+<td>143M</td>
+<td>33.88%</td>
+<td>19s</td>
+</tr>
+<tr>
+<td>xz-utils/stable 5.2.5-2 arm64</td>
+<td>880s</td>
+<td>97M</td>
+<td>22.99%</td>
+<td>35s</td>
+</tr>
+<tr>
+<td>lz4/stable 1.9.3-2 arm64</td>
+<td>7s</td>
+<td>201M</td>
+<td>47.63%</td>
+<td>8s</td>
+</tr>
+</tbody>
+</table>
+<p><small><em>CPU: RK3328 quad-core@1.2GHz；RAM: 2GB 32bit DDR4@1066MHz；RootFS: 32GB SDCard.</em></small></p>
+<p>测试结果确实反映了xz压缩的性能问题，尽管lzma算法压缩比一如既往的惊人，但高昂的时间成本丧尽了所有优势，并且在Google中未能找到有关lzma算法和ARM平台兼容性的反馈。</p>
+<p>综合时间成本和响应速度考虑，apt软件包列表的空间占用不算太高，显然使用lz4压缩更加适合。</p>
+<blockquote>
+<p>参考来源</p>
+<ol>
+<li>Armbian: <a href="https://forum.armbian.com/topic/14064-my-apt-search-has-become-super-slow-recently/"><em>My apt search has become super slow recently</em></a></li>
+<li>绒布地球: <a href="https://rongrongbq.moe/2021/07/How-to-solve-slowly-apt-search-on-Armbian/"><em>解决在 Armbian 中执行 apt search 非常慢的问题</em></a></li>
+<li>Github: <a href="https://github.com/MichaIng/DietPi/blob/master/rootfs/etc/apt/apt.conf.d/97dietpi#L17"><em>MichaIng/DietPi</em></a></li>
+<li>Debian manpages: <a href="https://manpages.debian.org/buster/apt/apt-transport-mirror.1.en.html"><em>APT-TRANSPORT-MIRR(1)</em></a></li>
+</ol>
+</blockquote>
+<p>最后更新于：2021年10月30日 13:16:06</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:80%;
+		max-width: 1000px;
+		padding: 8%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'cYdKlxx4zucRYpF2KHnNBrQG-9Nh9j0Va',
+		appKey: 'Pv4to1cs5XRiqv2vFqmTBMa0',
+		avatar: 'hide',
+		pageSize: 3,
+		recordIp: false,
+		placeholder: 'Just Go Go',
+		visitor: false,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"></div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <p id="hitokoto"><a href="https://hitokoto.cn/" id="hitokoto_text"></a><script src="https://v1.hitokoto.cn/?c=d&encode=js&select=%23hitokoto" defer></script></p>
+    </div>
+    <div>
+        Theme <a href="https://imhanjie.com/post/gridea-theme-pure/" target="_blank">Pure</a><br />
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://vlcheng.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
