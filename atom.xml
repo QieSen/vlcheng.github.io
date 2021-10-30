@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://vlcheng.github.io</id>
     <title>QieSen碎碎念</title>
-    <updated>2021-10-30T20:40:44.325Z</updated>
+    <updated>2021-10-30T20:41:46.180Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://vlcheng.github.io"/>
     <link rel="self" href="https://vlcheng.github.io/atom.xml"/>
@@ -49,8 +49,8 @@ $ sudo apt update
 <p>通过高优先级配置禁用了apt对软件包列表进行压缩，粗暴但简单。如果只为解决搜索慢的问题，至此已经完成了。如果对于apt软件包列表的空间占用有顾虑，则可以使用lz4压缩方式。</p>
 <h2 id="空间与效率的权衡">空间与效率的权衡</h2>
 <p>查看DietPi的项目代码发现在<code>/etc/apt/apt.conf.d/97dietpi</code>中有默认启用xz压缩的配置，同时<a href="https://github.com/MichaIng/DietPi/blob/master/rootfs/etc/apt/apt.conf.d/97dietpi#L17">维护者指出<sup>[3]</sup></a>lzma算法会显著降低软件包列表的读取速度，而Armbian则使用gzip。实际上在<a href="https://manpages.debian.org/buster/apt/apt-transport-mirror.1.en.html">apt手册<sup>[4]</sup></a>中有提到从1.6版本就已经开始支持压缩，Debian从buster开始默认启用这项特性。</p>
-<p><strong>比较多种压缩格式的效果</strong><br>
-在<code>/etc/apt/apt.conf.d/</code>目录中创建<code>99-index-compress</code>文件，写入四行内容覆盖97dietpi的配置：</p>
+<h3 id="比较多种压缩格式的效果">比较多种压缩格式的效果</h3>
+<p>在<code>/etc/apt/apt.conf.d/</code>目录中创建<code>99-index-compress</code>文件，写入四行内容覆盖97dietpi的配置：</p>
 <pre><code>Acquire::GzipIndexes &quot;true&quot;;
 Acquire::IndexTargets::deb::Packages::KeepCompressedAs &quot;xz&quot;;   # gz、xz、lz4
 Acquire::IndexTargets::deb::Translations::KeepCompressedAs &quot;xz&quot;;
